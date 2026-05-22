@@ -71,6 +71,15 @@ class ActorRolloutRefWorkerCausal(ActorRolloutRefWorker):
         if self.actor is None:
             raise RuntimeError("compute_attention_attribution_causal requires an actor worker.")
 
+        causal_use_gradient = bool(tu.get(data, key="causal_use_gradient", default=False))
+        causal_gradient_target = str(tu.get(data, key="causal_gradient_target", default="attention"))
+        if causal_use_gradient or causal_gradient_target != "attention":
+            raise NotImplementedError(
+                "The verl causal migration only supports attention-based causal weighting without gradient "
+                f"attribution. Received causal_use_gradient={causal_use_gradient}, "
+                f"causal_gradient_target={causal_gradient_target!r}."
+            )
+
         backend = self.config.actor.strategy
         if backend not in {"fsdp", "automodel"}:
             raise NotImplementedError(

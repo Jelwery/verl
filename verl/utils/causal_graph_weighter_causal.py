@@ -189,16 +189,16 @@ class CausalGraphWeighterCausal:
         degree = adjacency.sum(dim=-1, keepdim=True)
         is_dangling = (degree < 1e-6).float()
         adjacency_norm = torch.where(degree > 1e-6, adjacency / (degree + 1e-8), torch.zeros_like(adjacency))
-        _ = adjacency_norm + is_dangling * teleport_prob.transpose(-2, -1)
+        transition = adjacency_norm + is_dangling * teleport_prob.transpose(-2, -1)
         rhs = teleport_prob * (1 - damping)
 
         try:
             eye = torch.eye(seq_len, device=device, dtype=dtype).unsqueeze(0)
-            system = eye - damping * adjacency_norm.transpose(-2, -1)
+            system = eye - damping * transition.transpose(-2, -1)
             scores = torch.linalg.solve(system, rhs).squeeze(-1)
         except RuntimeError:
             walk = torch.ones(batch_size, seq_len, 1, device=device, dtype=dtype) / seq_len
-            transition = adjacency_norm.transpose(-2, -1)
+            transition = transition.transpose(-2, -1)
             for _ in range(20):
                 walk = damping * torch.bmm(transition, walk) + rhs
             scores = walk.squeeze(-1)
@@ -224,10 +224,10 @@ class CausalGraphWeighterCausal:
             return torch.linalg.solve(system, eye)
         except RuntimeError:
             solved = eye.clone()
-            current = adjacency
+            current = adjacency.clone()
             for _ in range(min(self.max_path_length, seq_len)):
-                current = torch.bmm(current, adjacency)
                 solved += current
+                current = torch.bmm(current, adjacency)
             return solved
 
 

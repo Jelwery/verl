@@ -53,6 +53,15 @@ class RayPPOTrainerCausal(RayPPOTrainer):
         return actor_output
 
     def _compute_causal_weights_causal(self, batch: DataProto) -> torch.Tensor:
+        causal_use_gradient = bool(self.config.algorithm.get("causal_use_gradient", False))
+        causal_gradient_target = str(self.config.algorithm.get("causal_gradient_target", "attention"))
+        if causal_use_gradient or causal_gradient_target != "attention":
+            raise NotImplementedError(
+                "The verl causal migration only supports attention-based causal weighting without gradient "
+                f"attribution. Received causal_use_gradient={causal_use_gradient}, "
+                f"causal_gradient_target={causal_gradient_target!r}."
+            )
+
         non_tensor_keys = []
         if "multi_modal_inputs" in batch.non_tensor_batch:
             non_tensor_keys.append("multi_modal_inputs")
@@ -73,8 +82,8 @@ class RayPPOTrainerCausal(RayPPOTrainer):
             causal_max_weight=float(self.config.algorithm.get("causal_max_weight", 2.0)),
             causal_aggregation=str(self.config.algorithm.get("causal_aggregation", "mean")),
             causal_normalize=self.config.algorithm.get("causal_normalize", True),
-            causal_use_gradient=bool(self.config.algorithm.get("causal_use_gradient", False)),
-            causal_gradient_target=str(self.config.algorithm.get("causal_gradient_target", "attention")),
+            causal_use_gradient=causal_use_gradient,
+            causal_gradient_target=causal_gradient_target,
             causal_centrality_measure=str(self.config.algorithm.get("causal_centrality_measure", "causal_effect")),
             causal_pagerank_damping=float(self.config.algorithm.get("causal_pagerank_damping", 0.85)),
         )
@@ -417,12 +426,11 @@ class RayPPOTrainerCausal(RayPPOTrainer):
 
         batch.batch["advantages"] = batch.batch["advantages"] * modulation_map
 
-        renorm_enabled = bool(
-            self.config.algorithm.get(
-                "causal_renormalize",
-                not self.config.algorithm.get("no_advantage_std_norm", False),
-            )
-        )
+        renorm_config = self.config.algorithm.get("causal_renormalize", None)
+        if renorm_config is None:
+            renorm_enabled = not self.config.algorithm.get("no_advantage_std_norm", False)
+        else:
+            renorm_enabled = bool(renorm_config)
         if renorm_enabled:
             self._renormalize_advantages_causal(batch)
 

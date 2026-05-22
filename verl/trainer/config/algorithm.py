@@ -608,6 +608,37 @@ class AlgoConfig(BaseConfig):
     kl_ctrl: KLControlConfig = field(default_factory=KLControlConfig)
     use_pf_ppo: bool = False
     pf_ppo: dict[str, Any] = field(default_factory=dict)
+    #######causal parameters########
+    enable_causal: Optional[bool] = None
+    causal_advantage_reweight: bool = False
+    causal_alpha: float = 0.5
+    causal_attention_threshold: float = 0.1
+    causal_max_path_length: int = 10
+    causal_temperature: float = 1.0
+    causal_min_weight: float = 0.0
+    causal_max_weight: float = 2.0
+    causal_aggregation: str = "mean"
+    causal_normalize: Any = True
+    causal_use_gradient: bool = False
+    causal_gradient_target: str = "attention"
+    causal_centrality_measure: str = "causal_effect"
+    causal_pagerank_damping: float = 0.85
+    dynamic_alpha_enabled: bool = False
+    dynamic_alpha_total_steps: int = 1000
+    dynamic_alpha_initial: float = 0.5
+    dynamic_alpha_min: float = -0.2
+    causal_ablation_mode: str = "fusion"
+    causal_lookback: int = 50
+    causal_end_penalty: float = 0.1
+    causal_k_sigma: float = 1.08
+    causal_tanh_scale: float = 3.0
+    causal_bc_smooth_window: int = 3
+    causal_bc_trend_window: int = 21
+    causal_bc_z_threshold: float = 1.0
+    causal_bc_max_clip: float = 2.0
+    causal_bc_min_clip: float = 0.2
+    causal_renormalize: Optional[bool] = None
+    ################
     filter_groups: Optional[FilterGroupsConfig] = None
     # Rollout Correction: corrects off-policy issues (policy mismatch, model staleness, distribution shifts)
     # Set to None to disable, use RolloutCorrectionConfig presets (e.g., .tis(), .mis()), or pass dict

@@ -111,6 +111,94 @@ algorithm:
     # Power used for weight scaling in "pow" method
     weight_pow: 2.0
 
+  #########################
+  # Whether to enable the causal migration path
+  enable_causal: null
+
+  # Whether to apply causal advantage reweighting before actor update
+  causal_advantage_reweight: False
+
+  # Base interpolation factor for the causal modulation map
+  causal_alpha: 0.5
+
+  # Attention edge threshold used when building the causal graph
+  causal_attention_threshold: 0.1
+
+  # Maximum path length used by the Neumann-series inverse fallback
+  causal_max_path_length: 10
+
+  # Temperature used when post-processing causal scores into weights
+  causal_temperature: 1.0
+
+  # Minimum clipped causal weight
+  causal_min_weight: 0.0
+
+  # Maximum clipped causal weight
+  causal_max_weight: 2.0
+
+  # Aggregation method across layers and heads
+  causal_aggregation: mean
+
+  # Whether to normalize causal weights, or a comma-delimited string for fusion mode
+  causal_normalize: True
+
+  # Whether to request gradient-based attribution in the causal worker
+  causal_use_gradient: False
+
+  # Attribution target for causal weighting
+  causal_gradient_target: attention
+
+  # Centrality metric used to build causal weights
+  causal_centrality_measure: causal_effect
+
+  # Damping factor used by causal PageRank
+  causal_pagerank_damping: 0.85
+
+  # Whether to enable cosine decay for causal alpha
+  dynamic_alpha_enabled: False
+
+  # Total steps used by the dynamic alpha schedule
+  dynamic_alpha_total_steps: 1000
+
+  # Initial alpha used by the dynamic alpha schedule
+  dynamic_alpha_initial: 0.5
+
+  # Minimum alpha reached by the dynamic alpha schedule
+  dynamic_alpha_min: -0.2
+
+  # Budget-matched ablation mode for the fused modulation map
+  causal_ablation_mode: fusion
+
+  # Lookback window used by the default causal modulator
+  causal_lookback: 50
+
+  # End-of-sequence decay applied inside the lookback window
+  causal_end_penalty: 0.1
+
+  # Z-score threshold for the default causal modulator
+  causal_k_sigma: 1.08
+
+  # Tanh scaling factor for the default causal modulator
+  causal_tanh_scale: 3.0
+
+  # Smoothing window for betweenness-based modulation
+  causal_bc_smooth_window: 3
+
+  # Trend window for betweenness-based modulation
+  causal_bc_trend_window: 21
+
+  # Z-score threshold for betweenness-based modulation
+  causal_bc_z_threshold: 1.0
+
+  # Maximum clip value for betweenness-based modulation
+  causal_bc_max_clip: 2.0
+
+  # Minimum clip value for betweenness-based modulation
+  causal_bc_min_clip: 0.2
+
+  # Whether to renormalize advantages after causal reweighting
+  causal_renormalize: null
+  ##########################
 # config for the trainer
 trainer:
 
